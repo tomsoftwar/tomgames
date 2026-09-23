@@ -2,7 +2,7 @@
 
   const REPO = 'tomsoftwar/tomgames';
   const BRANCH = 'main';
-  const POSTS_PATH = 'posts';
+  const POSTS_PATH = 'Posts';
 
   function esc(value) {
     return String(value ?? '').replace(/[&<>"']/g, function (c) {
