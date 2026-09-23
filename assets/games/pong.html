@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>PONG | TOMSOFTWAR</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Press Start 2P', monospace;
+    color: #fff;
+    overflow: hidden;
+    image-rendering: pixelated;
+  }
+  #game-container {
+    position: relative;
+    border: 4px solid #444;
+    box-shadow: 0 0 20px #000, inset 0 0 10px #111;
+  }
+  canvas {
+    display: block;
+    background: #000;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+  #ui {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    pointer-events: none;
+    font-size: 8px;
+    padding: 4px 6px;
+    display: flex;
+    justify-content: space-between;
+    text-shadow: 1px 1px 0 #000;
+  }
+  #overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    z-index: 10;
+  }
+  #overlay h1 {
+    font-size: 20px;
+    color: #ff0;
+    margin-bottom: 16px;
+    text-shadow: 2px 2px 0 #f00;
+  }
+  #overlay p {
+    font-size: 8px;
+    line-height: 1.8;
+    margin-bottom: 8px;
+    max-width: 280px;
+  }
+  #overlay .start-btn {
+    margin-top: 20px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    padding: 10px 18px;
+    background: #ff0;
+    color: #000;
+    border: 3px solid #fff;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+  #overlay .start-btn:hover { background: #fff; }
+  #overlay .credits {
+    margin-top: 24px;
+    font-size: 6px;
+    color: #888;
+  }
+  #mobile-controls {
+    display: none;
+    margin-top: 10px;
+    gap: 20px;
+  }
+  #mobile-controls button {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    padding: 12px 24px;
+    background: #333;
+    color: #ff0;
+    border: 3px solid #666;
+    cursor: pointer;
+  }
+  @media (max-width: 500px) {
+    #mobile-controls { display: flex; }
+  }
+</style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="c" width="320" height="240"></canvas>
+    <div id="ui">
+      <span id="score">SCORE: 0000</span>
+      <span id="level">LVL 1</span>
+      <span id="lives">LIVES: 3</span>
+    </div>
+    <div id="overlay">
+      <h1>PONG</h1>
+      <p>RETRÔ GAME</p>
+      <p style="margin-top:12px">CONTROLE A BARRA AMARELA<br>REBATA A BOLINHA BRANCA<br>DESTRUA A PIRÂMIDE!</p>
+      <p style="margin-top:12px;color:#0f0">← → / A/D ou DESLIZE o dedo<br>Botões ◀ ▶ também funcionam<br>ESPAÇO ou TOQUE para iniciar</p>
+      <button class="start-btn" id="startBtn">START</button>
+      <div class="credits">
+        DESENVOLVIDO POR TOMSOFTWAR ©2026<br>
+        tomsoftwar@gmail.com
+      </div>
+    </div>
+  </div>
+  <div id="mobile-controls">
+    <button id="btnLeft">◀</button>
+    <button id="btnRight">▶</button>
+  </div>
+
+<script>
+// ==================== ATARI 2600 STYLE PONG ====================
+// Desenvolvido por TOMSOFTWAR ©2026 - tomsoftwar@gmail.com
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+// Virtual low-res (Atari feel)
+const W = 160;
+const H = 120;
+const SCALE = 2; // canvas is 320x240
+
+// Game state
+let state = 'title'; // title | play | levelup | gameover | win | winanim | demo
+let score = 0;
+let lives = 3;
+let level = 1;
+let frame = 0;
+let lastTime = 0;
+let lifeBonusAt = 1500; // próxima meta de vida extra
+
+// timers (ms)
+let titleIdleTimer = 0;   // tempo parado na tela inicial
+let demoTimer = 0;        // tempo da demo
+let winAnimTimer = 0;     // duração da animação de vitória
+const TITLE_WAIT_MS = 5000;
+const DEMO_DURATION_MS = 5000;
+const WIN_ANIM_MS = 5000;
+
+// Input
+const keys = {};
+let touchLeft = false, touchRight = false;
+
+// Paddle
+const paddle = {
+  w: 24, h: 4,
+  x: W/2 - 12, y: H - 12,
+  speed: 1.8
+};
+
+// Balls
+let balls = [];
+
+// Blocks (pyramid)
+let blocks = [];
+const BLOCK_W = 10;
+const BLOCK_H = 5;
+
+// Fruit
+let fruit = null;
+let fruitTimer = 0;
+
+// Relógio (congela pirâmide)
+let clock = null;
+let clockTimer = 0;
+let freezeTimer = 0; // frames restantes de congelamento (~7s a 60fps = 420)
+
+// Extra ball timer
+let extraBallTimer = 0;
+
+// Pyramid descent
+let pyramidY = 8;
+let pyramidSpeed = 0.005;
+
+// bolinhas da animação de vitória
+let winBalls = [];
+
+// Level colors for pyramids
+const LEVEL_COLORS = [
+  null,
+  ['#ff0000','#ff4400','#ff8800','#ffcc00','#ffff00'], // L1 warm
+  ['#00ff00','#00cc00','#009900','#00ff88','#88ff00'], // L2 green
+  ['#0088ff','#00aaff','#00ccff','#44ffff','#88ffff'], // L3 cyan
+  ['#ff00ff','#cc00ff','#8800ff','#ff44ff','#ff88ff'], // L4 magenta
+  ['#ffffff','#cccccc','#aaaaaa','#ff0000','#ffff00']  // L5 final
+];
+
+// ==================== AUDIO (8-bit) ====================
+let audioCtx = null;
+let musicOsc = null;
+let musicGain = null;
+let musicPlaying = false;
+let noteIndex = 0;
+let noteTimer = 0;
+
+const MELODY = [ // simple 8-bit loop (Hz)
+  220, 247, 262, 294, 330, 294, 262, 247,
+  220, 196, 175, 196, 220, 247, 262, 247,
+  294, 330, 349, 392, 349, 330, 294, 262,
+  247, 220, 196, 175, 196, 220, 0, 0
+];
+const NOTE_LEN = 12; // frames per note
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  musicGain = audioCtx.createGain();
+  musicGain.gain.value = 0.08;
+  musicGain.connect(audioCtx.destination);
+}
+
+function playBeep(freq, dur = 0.08, type = 'square', vol = 0.15) {
+  if (!audioCtx) return;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type;
+  o.frequency.value = freq;
+  g.gain.value = vol;
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime + dur);
+}
+
+function startMusic() {
+  if (!audioCtx || musicPlaying) return;
+  musicPlaying = true;
+  noteIndex = 0;
+  noteTimer = 0;
+}
+
+function stopMusic() {
+  musicPlaying = false;
+  if (musicOsc) { try { musicOsc.stop(); } catch(e){} musicOsc = null; }
+}
+
+function updateMusic() {
+  if (!musicPlaying || !audioCtx) return;
+  noteTimer++;
+  if (noteTimer >= NOTE_LEN) {
+    noteTimer = 0;
+    noteIndex = (noteIndex + 1) % MELODY.length;
+    if (musicOsc) { try { musicOsc.stop(); } catch(e){} }
+    const f = MELODY[noteIndex];
+    if (f > 0) {
+      musicOsc = audioCtx.createOscillator();
+      musicOsc.type = 'square';
+      musicOsc.frequency.value = f;
+      musicOsc.connect(musicGain);
+      musicOsc.start();
+    } else {
+      musicOsc = null;
+    }
+  }
+}
+
+// ==================== HELPERS ====================
+function rectsOverlap(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+// velocidade base sobe só ao passar de nível (nível 1 calmo)
+function getBallSpeed() {
+  // nível 1: ~0.48 | 2: ~0.62 | 3: ~0.76 | 4: ~0.90 | 5: ~1.04
+  return 1.15 + (level - 1) * 0.15;
+}
+
+function createBall(x, y, dirX, dirY) {
+  const s = getBallSpeed();
+  const dx = dirX !== undefined ? dirX : (Math.random() > 0.5 ? 1 : -1);
+  const dy = dirY !== undefined ? dirY : -1;
+  // normaliza para manter velocidade constante na direção
+  const len = Math.sqrt(dx * dx + dy * dy) || 1;
+  return {
+    x: x,
+    y: y,
+    r: 2,
+    vx: (dx / len) * s * 0.85,
+    vy: (dy / len) * s,
+    active: true
+  };
+}
+
+function buildPyramid(lvl) {
+  blocks = [];
+  pyramidY = 8;
+  const rows = 5 + Math.min(lvl, 3); // more rows on higher levels
+  const colors = LEVEL_COLORS[lvl] || LEVEL_COLORS[1];
+  const startX = (W - (rows * BLOCK_W)) / 2;
+  for (let row = 0; row < rows; row++) {
+    const cols = rows - row;
+    const offset = (row * BLOCK_W) / 2;
+    for (let col = 0; col < cols; col++) {
+      blocks.push({
+        x: startX + offset + col * BLOCK_W,
+        y: pyramidY + row * BLOCK_H,
+        w: BLOCK_W - 1,
+        h: BLOCK_H - 1,
+        color: colors[row % colors.length],
+        alive: true
+      });
+    }
+  }
+  // desce mais rápido a cada nível
+  // lvl1 ~0.005 | lvl2 ~0.010 | lvl3 ~0.015 | lvl4 ~0.020 | lvl5 ~0.025
+  pyramidSpeed = 0.005 + (lvl - 1) * 0.005;
+}
+
+function resetBalls() {
+  // velocidade depende só do nível atual
+  balls = [createBall(W/2, H - 30, Math.random() > 0.5 ? 1 : -1, -1)];
+}
+
+function spawnFruit() {
+  fruit = {
+    x: 20 + Math.random() * (W - 40),
+    y: 40 + Math.random() * 40,
+    w: 6, h: 6,
+    life: 300, // frames
+    type: Math.random() > 0.5 ? 'apple' : 'cherry'
+  };
+}
+
+function spawnClock() {
+  clock = {
+    x: 20 + Math.random() * (W - 40),
+    y: 35 + Math.random() * 45,
+    w: 7, h: 7,
+    life: 320 // frames visível
+  };
+}
+
+function checkLifeBonus() {
+  while (score >= lifeBonusAt) {
+    lives++;
+    lifeBonusAt += 1500;
+    playBeep(784, 0.12);
+    playBeep(988, 0.15);
+  }
+}
+
+function startWinAnim() {
+  state = 'winanim';
+  winAnimTimer = 0;
+  stopMusic();
+  playBeep(523, 0.15);
+  playBeep(659, 0.15);
+  playBeep(784, 0.2);
+  playBeep(1046, 0.25);
+  // várias bolinhas quicando rápido
+  winBalls = [];
+  for (let i = 0; i < 18; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const sp = 1.8 + Math.random() * 2.2;
+    winBalls.push({
+      x: 20 + Math.random() * (W - 40),
+      y: 20 + Math.random() * (H - 40),
+      r: 2,
+      vx: Math.cos(angle) * sp,
+      vy: Math.sin(angle) * sp
+    });
+  }
+  const ov = document.getElementById('overlay');
+  ov.style.display = 'flex';
+  ov.style.background = 'rgba(0,0,0,0.55)';
+  ov.innerHTML = `
+    <h1 style="color:#ff0;font-size:14px;line-height:1.6">PARABÉNS,<br>VOCÊ VENCEU!</h1>
+    <p style="margin-top:12px">SCORE: ${String(score).padStart(4,'0')}</p>
+    <div class="credits">TOMSOFTWAR ©2026</div>
+  `;
+}
+
+function goToTitle() {
+  state = 'title';
+  titleIdleTimer = 0;
+  demoTimer = 0;
+  winBalls = [];
+  balls = [];
+  blocks = [];
+  fruit = null;
+  clock = null;
+  freezeTimer = 0;
+  stopMusic();
+  const ov = document.getElementById('overlay');
+  ov.style.display = 'flex';
+  ov.style.background = 'rgba(0,0,0,0.85)';
+  ov.innerHTML = `
+    <h1>PONG</h1>
+    <p>ATARI 2600 STYLE</p>
+    <p style="margin-top:12px">CONTROLE A BARRA AMARELA<br>REBATA A BOLINHA BRANCA<br>DESTRUA A PIRÂMIDE!</p>
+    <p style="margin-top:12px;color:#0f0">← → / A/D ou DESLIZE o dedo<br>Botões ◀ ▶ também funcionam<br>ESPAÇO ou TOQUE para iniciar</p>
+    <button class="start-btn" id="startBtn">START</button>
+    <div class="credits">
+      DESENVOLVIDO POR TOMSOFTWAR ©2026<br>
+      tomsoftwar@gmail.com
+    </div>
+  `;
+  document.getElementById('startBtn').onclick = startGame;
+  updateUI();
+}
+
+function startDemo() {
+  state = 'demo';
+  demoTimer = 0;
+  level = 1;
+  score = 0;
+  lives = 3;
+  paddle.x = W / 2 - paddle.w / 2;
+  buildPyramid(1);
+  resetBalls();
+  fruit = null;
+  fruitTimer = 180;
+  clock = null;
+  clockTimer = 220;
+  freezeTimer = 0;
+  extraBallTimer = 300;
+  document.getElementById('overlay').style.display = 'none';
+  // leve música de fundo opcional
+  initAudio();
+  startMusic();
+}
+
+function nextLevel() {
+  level++;
+  if (level > 5) {
+    startWinAnim();
+    return;
+  }
+  state = 'levelup';
+  buildPyramid(level);
+  resetBalls();
+  fruit = null;
+  clock = null;
+  freezeTimer = 0;
+  extraBallTimer = 400 + Math.random() * 300;
+  fruitTimer = 200 + Math.random() * 200;
+  clockTimer = 280 + Math.random() * 300;
+  playBeep(440, 0.15); playBeep(554, 0.15); playBeep(659, 0.2);
+}
+
+// ==================== DRAW (pixel style) ====================
+function drawRect(x, y, w, h, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(Math.floor(x) * SCALE, Math.floor(y) * SCALE, Math.ceil(w) * SCALE, Math.ceil(h) * SCALE);
+}
+
+function drawCircle(x, y, r, color) {
+  ctx.fillStyle = color;
+  // square "pixel" ball for Atari feel
+  const s = Math.max(2, r * 2);
+  ctx.fillRect(Math.floor(x - r) * SCALE, Math.floor(y - r) * SCALE, s * SCALE, s * SCALE);
+}
+
+function drawFruit(f) {
+  // simple 8-bit fruit
+  if (f.type === 'apple') {
+    drawRect(f.x, f.y, 6, 5, '#ff2222');
+    drawRect(f.x + 2, f.y - 1, 2, 2, '#00aa00');
+  } else {
+    drawRect(f.x, f.y, 3, 4, '#cc0000');
+    drawRect(f.x + 3, f.y + 1, 3, 4, '#ff4444');
+    drawRect(f.x + 2, f.y - 1, 2, 2, '#00aa00');
+  }
+}
+
+function drawClock(c) {
+  // relógio 8-bit (círculo + ponteiros)
+  drawRect(c.x, c.y, 7, 7, '#dddd00');
+  drawRect(c.x + 1, c.y + 1, 5, 5, '#222222');
+  drawRect(c.x + 3, c.y + 2, 1, 3, '#ffff00'); // ponteiro vertical
+  drawRect(c.x + 3, c.y + 3, 2, 1, '#ffff00'); // ponteiro horizontal
+  drawRect(c.x + 3, c.y, 1, 1, '#ffffff'); // topo
+}
+
+function draw() {
+  // clear
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // scanline effect (subtle)
+  if (frame % 2 === 0) {
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    for (let y = 0; y < canvas.height; y += 4) {
+      ctx.fillRect(0, y, canvas.width, 1);
+    }
+  }
+
+  // animação de vitória: só bolinhas
+  if (state === 'winanim') {
+    for (const b of winBalls) {
+      drawCircle(b.x, b.y, b.r, '#ffffff');
+    }
+    return;
+  }
+
+  // blocks
+  for (const b of blocks) {
+    if (!b.alive) continue;
+    drawRect(b.x, b.y, b.w, b.h, b.color);
+    drawRect(b.x, b.y, b.w, 1, '#ffffff88');
+  }
+
+  // fruit
+  if (fruit) drawFruit(fruit);
+
+  // relógio
+  if (clock) drawClock(clock);
+
+  // indicador de congelamento (embaixo, longe do SCORE)
+  if (freezeTimer > 0 && (state === 'play' || state === 'demo')) {
+    const barW = Math.max(1, (freezeTimer / 420) * 40);
+    const barX = (W - 40) / 2;
+    const barY = H - 6;
+    drawRect(barX - 1, barY - 1, 42, 4, '#333333'); // fundo
+    drawRect(barX, barY, barW, 2, '#ffff00');       // tempo restante
+  }
+
+  // paddle (yellow) — só em play/demo
+  if (state === 'play' || state === 'demo') {
+    drawRect(paddle.x, paddle.y, paddle.w, paddle.h, '#ffff00');
+    drawRect(paddle.x, paddle.y, paddle.w, 1, '#ffffaa');
+  }
+
+  // balls (white)
+  for (const ball of balls) {
+    if (ball.active) drawCircle(ball.x, ball.y, ball.r, '#ffffff');
+  }
+
+  // indicador DEMO
+  if (state === 'demo') {
+    ctx.fillStyle = '#ff0';
+    ctx.font = '10px "Press Start 2P", monospace';
+    ctx.fillText('DEMO', 8, canvas.height - 8);
+  }
+}
+
+// ==================== UPDATE ====================
+function update(dt) {
+  // --- animação de vitória ---
+  if (state === 'winanim') {
+    winAnimTimer += dt;
+    for (const b of winBalls) {
+      b.x += b.vx;
+      b.y += b.vy;
+      if (b.x < 2 || b.x > W - 2) b.vx = -b.vx;
+      if (b.y < 2 || b.y > H - 2) b.vy = -b.vy;
+    }
+    if (winAnimTimer >= WIN_ANIM_MS) {
+      goToTitle();
+    }
+    return;
+  }
+
+  // --- tela título: espera 5s e inicia demo ---
+  if (state === 'title') {
+    titleIdleTimer += dt;
+    if (titleIdleTimer >= TITLE_WAIT_MS) {
+      startDemo();
+    }
+    return;
+  }
+
+  // --- demo: roda 5s e volta ao título ---
+  if (state === 'demo') {
+    demoTimer += dt;
+    if (demoTimer >= DEMO_DURATION_MS) {
+      goToTitle();
+      return;
+    }
+    // continua abaixo como se fosse play (com IA)
+  } else if (state !== 'play') {
+    return;
+  }
+
+  frame++;
+  updateMusic();
+
+  // paddle movement
+  if (state === 'demo') {
+    // IA simples: segue a bolinha ativa mais baixa
+    let target = W / 2;
+    let lowest = null;
+    for (const ball of balls) {
+      if (!ball.active) continue;
+      if (!lowest || ball.y > lowest.y) lowest = ball;
+    }
+    if (lowest) target = lowest.x;
+    const center = paddle.x + paddle.w / 2;
+    if (center < target - 2) paddle.x += paddle.speed * 0.9;
+    else if (center > target + 2) paddle.x -= paddle.speed * 0.9;
+  } else {
+    let dx = 0;
+    if (keys['ArrowLeft'] || keys['a'] || keys['A'] || touchLeft) dx = -paddle.speed;
+    if (keys['ArrowRight'] || keys['d'] || keys['D'] || touchRight) dx = paddle.speed;
+    paddle.x += dx;
+  }
+  if (paddle.x < 0) paddle.x = 0;
+  if (paddle.x + paddle.w > W) paddle.x = W - paddle.w;
+
+  // pyramid descent (parado se relógio ativo)
+  if (freezeTimer > 0) freezeTimer--;
+  let anyAlive = false;
+  for (const b of blocks) {
+    if (b.alive) {
+      anyAlive = true;
+      if (freezeTimer <= 0) b.y += pyramidSpeed;
+    }
+  }
+  // check if pyramid hit paddle line
+  if (anyAlive) {
+    for (const b of blocks) {
+      if (b.alive && b.y + b.h >= paddle.y) {
+        if (state === 'demo') {
+          // na demo: reinicia a pirâmide
+          buildPyramid(1);
+          resetBalls();
+          return;
+        }
+        // game over - pyramid reached bottom
+        lives = 0;
+        state = 'gameover';
+        stopMusic();
+        playBeep(110, 0.4, 'sawtooth', 0.2);
+        showOverlay('GAME OVER', 'A PIRÂMIDE CHEGOU!');
+        return;
+      }
+    }
+  } else {
+    // all destroyed
+    if (state === 'demo') {
+      buildPyramid(1);
+      resetBalls();
+      return;
+    }
+    nextLevel();
+    return;
+  }
+
+  // balls
+  let activeBalls = 0;
+  for (const ball of balls) {
+    if (!ball.active) continue;
+    activeBalls++;
+
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+
+    // walls
+    if (ball.x - ball.r <= 0) { ball.x = ball.r; ball.vx = Math.abs(ball.vx); playBeep(180, 0.04); }
+    if (ball.x + ball.r >= W) { ball.x = W - ball.r; ball.vx = -Math.abs(ball.vx); playBeep(180, 0.04); }
+    if (ball.y - ball.r <= 0) { ball.y = ball.r; ball.vy = Math.abs(ball.vy); playBeep(200, 0.04); }
+
+    // miss
+    if (ball.y > H + 5) {
+      ball.active = false;
+      activeBalls--;
+    }
+
+    // paddle collision — velocidade NÃO aumenta no rebate, só no nível
+    if (ball.vy > 0 &&
+        ball.y + ball.r >= paddle.y &&
+        ball.y - ball.r <= paddle.y + paddle.h &&
+        ball.x + ball.r >= paddle.x &&
+        ball.x - ball.r <= paddle.x + paddle.w) {
+      ball.y = paddle.y - ball.r;
+      // ângulo baseado na posição do impacto, mantendo a velocidade do nível
+      const hit = (ball.x - (paddle.x + paddle.w / 2)) / (paddle.w / 2);
+      const s = getBallSpeed();
+      ball.vx = hit * s * 1.15;
+      ball.vy = -s;
+      // garante velocidade constante do nível
+      const len = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy) || 1;
+      ball.vx = (ball.vx / len) * s;
+      ball.vy = (ball.vy / len) * s;
+      playBeep(330, 0.06);
+    }
+
+    // blocks
+    for (const b of blocks) {
+      if (!b.alive) continue;
+      if (ball.x + ball.r > b.x && ball.x - ball.r < b.x + b.w &&
+          ball.y + ball.r > b.y && ball.y - ball.r < b.y + b.h) {
+        b.alive = false;
+        score += 10;
+        checkLifeBonus();
+        // bounce
+        const overlapX = Math.min(ball.x + ball.r - b.x, b.x + b.w - (ball.x - ball.r));
+        const overlapY = Math.min(ball.y + ball.r - b.y, b.y + b.h - (ball.y - ball.r));
+        if (overlapX < overlapY) {
+          ball.vx = -ball.vx;
+        } else {
+          ball.vy = -ball.vy;
+        }
+        playBeep(440 + Math.random() * 200, 0.05);
+        break;
+      }
+    }
+
+    // fruit
+    if (fruit && ball.x + ball.r > fruit.x && ball.x - ball.r < fruit.x + fruit.w &&
+        ball.y + ball.r > fruit.y && ball.y - ball.r < fruit.y + fruit.h) {
+      score += 50;
+      checkLifeBonus();
+      fruit = null;
+      playBeep(660, 0.1); playBeep(880, 0.12);
+    }
+
+    // relógio — congela pirâmide por ~7 segundos
+    if (clock && ball.x + ball.r > clock.x && ball.x - ball.r < clock.x + clock.w &&
+        ball.y + ball.r > clock.y && ball.y - ball.r < clock.y + clock.h) {
+      clock = null;
+      freezeTimer = 420; // ~7s a 60fps
+      playBeep(392, 0.1);
+      playBeep(523, 0.12);
+      playBeep(659, 0.15);
+    }
+  }
+
+  // lost all balls
+  if (activeBalls === 0) {
+    if (state === 'demo') {
+      resetBalls();
+    } else {
+      lives--;
+      playBeep(150, 0.25, 'sawtooth', 0.18);
+      if (lives <= 0) {
+        state = 'gameover';
+        stopMusic();
+        showOverlay('GAME OVER', 'SCORE: ' + score);
+      } else {
+        resetBalls();
+      }
+    }
+  }
+
+  // fruit timer
+  if (fruit) {
+    fruit.life--;
+    if (fruit.life <= 0) fruit = null;
+  } else {
+    fruitTimer--;
+    if (fruitTimer <= 0) {
+      spawnFruit();
+      fruitTimer = 350 + Math.random() * 400;
+    }
+  }
+
+  // relógio timer (aparece de vez em quando, não junto com fruta se possível)
+  if (clock) {
+    clock.life--;
+    if (clock.life <= 0) clock = null;
+  } else {
+    clockTimer--;
+    if (clockTimer <= 0) {
+      spawnClock();
+      clockTimer = 450 + Math.random() * 500;
+    }
+  }
+
+  // extra ball
+  extraBallTimer--;
+  if (extraBallTimer <= 0 && balls.filter(b => b.active).length < 2) {
+    balls.push(createBall(W/2, H/2, Math.random()>0.5?1:-1, -1));
+    extraBallTimer = 500 + Math.random() * 400;
+    playBeep(523, 0.1); playBeep(784, 0.1);
+  }
+
+  updateUI();
+}
+
+function updateUI() {
+  document.getElementById('score').textContent = 'SCORE: ' + String(score).padStart(4, '0');
+  document.getElementById('level').textContent = 'LVL ' + level;
+  document.getElementById('lives').textContent = 'LIVES: ' + lives;
+}
+
+function showOverlay(title, msg) {
+  const ov = document.getElementById('overlay');
+  ov.style.display = 'flex';
+  ov.innerHTML = `
+    <h1>${title}</h1>
+    <p>${msg || ''}</p>
+    <p style="margin-top:12px;color:#0f0">ESPAÇO ou TOQUE/CLIQUE PARA REINICIAR</p>
+    <button class="start-btn" id="startBtn">RESTART</button>
+    <div class="credits">
+      DESENVOLVIDO POR TOMSOFTWAR ©2026<br>
+      tomsoftwar@gmail.com
+    </div>
+  `;
+  document.getElementById('startBtn').onclick = startGame;
+}
+
+function startGame() {
+  initAudio();
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  score = 0;
+  lives = 3;
+  level = 1;
+  lifeBonusAt = 1500;
+  titleIdleTimer = 0;
+  demoTimer = 0;
+  winAnimTimer = 0;
+  winBalls = [];
+  state = 'play';
+  paddle.x = W/2 - paddle.w/2;
+  buildPyramid(1);
+  resetBalls();
+  fruit = null;
+  fruitTimer = 250;
+  clock = null;
+  clockTimer = 300 + Math.random() * 200;
+  freezeTimer = 0;
+  extraBallTimer = 400;
+  startMusic();
+  const ov = document.getElementById('overlay');
+  ov.style.display = 'none';
+  ov.style.background = 'rgba(0,0,0,0.85)';
+  updateUI();
+}
+
+// TOM GAMES: inicia automaticamente após a sinopse do popup.
+if(new URLSearchParams(location.search).get('tomIntro')==='1'){ setTimeout(()=>{ if(state==='title') startGame(); },5000); }
+
+// ==================== INPUT ====================
+function tryStartOrContinue() {
+  if (state === 'title' || state === 'gameover' || state === 'win' || state === 'demo' || state === 'winanim') {
+    startGame();
+  } else if (state === 'levelup') {
+    state = 'play';
+    document.getElementById('overlay').style.display = 'none';
+  }
+}
+
+window.addEventListener('keydown', e => {
+  keys[e.key] = true;
+  if (e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault();
+    tryStartOrContinue();
+  }
+});
+window.addEventListener('keyup', e => { keys[e.key] = false; });
+
+document.getElementById('startBtn').onclick = startGame;
+
+// clique / toque na tela (overlay ou canvas) inicia ou reinicia
+const gameContainer = document.getElementById('game-container');
+gameContainer.addEventListener('click', (e) => {
+  if (e.target.closest && e.target.closest('#mobile-controls')) return;
+  tryStartOrContinue();
+});
+
+// mobile — botões ◀ ▶ (opção 1)
+const btnL = document.getElementById('btnLeft');
+const btnR = document.getElementById('btnRight');
+btnL.addEventListener('touchstart', e => { e.preventDefault(); touchLeft = true; });
+btnL.addEventListener('touchend', e => { e.preventDefault(); touchLeft = false; });
+btnL.addEventListener('touchcancel', e => { touchLeft = false; });
+btnR.addEventListener('touchstart', e => { e.preventDefault(); touchRight = true; });
+btnR.addEventListener('touchend', e => { e.preventDefault(); touchRight = false; });
+btnR.addEventListener('touchcancel', e => { touchRight = false; });
+btnL.addEventListener('mousedown', () => touchLeft = true);
+btnL.addEventListener('mouseup', () => touchLeft = false);
+btnL.addEventListener('mouseleave', () => touchLeft = false);
+btnR.addEventListener('mousedown', () => touchRight = true);
+btnR.addEventListener('mouseup', () => touchRight = false);
+btnR.addEventListener('mouseleave', () => touchRight = false);
+
+// helper: posiciona a barra pelo ponto X da tela
+function movePaddleToClientX(clientX) {
+  if (state !== 'play') return;
+  const rect = canvas.getBoundingClientRect();
+  // escala real do canvas na tela (pode ser diferente de SCALE se CSS redimensionar)
+  const scaleX = canvas.width / rect.width;
+  const mx = (clientX - rect.left) * scaleX / SCALE;
+  paddle.x = mx - paddle.w / 2;
+  if (paddle.x < 0) paddle.x = 0;
+  if (paddle.x + paddle.w > W) paddle.x = W - paddle.w;
+}
+
+// mouse no canvas → move a barra
+canvas.addEventListener('mousemove', e => {
+  movePaddleToClientX(e.clientX);
+});
+
+// deslizar o dedo na tela (opção 2) → move a barra
+canvas.addEventListener('touchstart', e => {
+  if (state !== 'play') {
+    e.preventDefault();
+    tryStartOrContinue();
+    return;
+  }
+  e.preventDefault();
+  if (e.touches.length > 0) movePaddleToClientX(e.touches[0].clientX);
+}, { passive: false });
+
+canvas.addEventListener('touchmove', e => {
+  if (state !== 'play') return;
+  e.preventDefault();
+  if (e.touches.length > 0) movePaddleToClientX(e.touches[0].clientX);
+}, { passive: false });
+
+// toque no overlay (fora do canvas) também inicia/reinicia
+const overlayEl = document.getElementById('overlay');
+overlayEl.addEventListener('touchstart', e => {
+  if (state !== 'play') {
+    e.preventDefault();
+    tryStartOrContinue();
+  }
+}, { passive: false });
+overlayEl.addEventListener('click', () => tryStartOrContinue());
+
+// ==================== LOOP ====================
+function loop(t) {
+  const dt = Math.min(32, t - lastTime);
+  lastTime = t;
+  update(dt);
+  draw();
+
+  // level up overlay
+  if (state === 'levelup') {
+    const ov = document.getElementById('overlay');
+    if (ov.style.display !== 'flex') {
+      ov.style.display = 'flex';
+      ov.innerHTML = `
+        <h1>LEVEL ${level}</h1>
+        <p>PREPARE-SE!</p>
+        <p style="margin-top:12px;color:#0f0">ESPAÇO ou TOQUE/CLIQUE PARA CONTINUAR</p>
+        <div class="credits">TOMSOFTWAR ©2026</div>
+      `;
+    }
+  }
+  requestAnimationFrame(loop);
+}
+
+// init
+updateUI();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
