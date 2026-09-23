@@ -1,0 +1,35 @@
+backend:
+  name: github
+  repo: tomsoftwar/tomgames
+  branch: main
+
+media_folder: "imagens/blog"
+public_folder: "/imagens/blog"
+
+collections:
+  - name: "posts"
+    label: "Postagens"
+    folder: "posts"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - label: "Título"
+        name: "title"
+        widget: "string"
+
+      - label: "Imagem"
+        name: "image"
+        widget: "image"
+        required: false
+
+      - label: "Resumo"
+        name: "description"
+        widget: "text"
+
+      - label: "Conteúdo"
+        name: "body"
+        widget: "markdown"
+
+      - label: "Data"
+        name: "date"
+        widget: "datetime"
