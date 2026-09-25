@@ -1,1 +1,561 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BLOG DE TECNOLOGIA | TOM GAMES</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/css/style.css"></head><body><header class="header"><div class="topbar container"><a class="brand" href="index.html"><span class="ghost" aria-hidden="true"><i></i><i></i><b></b></span><span><strong>TOM GAMES</strong><small>ARCADE • TECNOLOGIA • NOSTALGIA</small></span></a><div class="header-actions"><button class="icon-btn" id="themeBtn">◐</button><button class="menu-btn" id="menuBtn">☰</button></div></div><nav id="nav" class="nav container"><a href="index.html">HOME</a><a class="active" href="blog.html">BLOG DE TECNOLOGIA</a><a href="quem-somos.html">QUEM SOMOS</a><a href="privacidade.html">PRIVACIDADE</a><a href="termos.html">TERMOS</a><a href="downloads.html">DOWNLOADS</a><a href="contato.html">CONTATO</a></nav></header><main class="container"><section class="page-head"><span class="kicker">TOM GAMES • TECNOLOGIA</span><h1>Blog de Tecnologia</h1><p class="lead">Notícias, análises e artigos sobre tecnologia, inovação, internet, inteligência artificial, hardware, software e games.</p><div class="blog-toolbar"><input id="blogSearch" placeholder="Pesquisar artigos..." aria-label="Pesquisar artigos"><a class="btn red" href="admin.html">🔐 ÁREA DO AUTOR</a></div><div id="posts" class="post-grid"></div><div id="empty" class="notice" style="display:none">Nenhum artigo encontrado. Entre na Área do Autor para publicar sua primeira matéria.</div></section></main><footer><div class="container footer-grid"><div><div class="footer-brand">TOM GAMES</div><p>Preservando a cultura gamer e acompanhando o futuro da tecnologia.</p></div><div><b>NAVEGAÇÃO</b><a href="index.html">Home</a><a href="blog.html">Blog de Tecnologia</a><a href="downloads.html">Downloads</a></div><div><b>LEGAL</b><a href="privacidade.html">Privacidade</a><a href="termos.html">Termos de Uso</a><a href="contato.html">Contato</a></div></div><div class="copyright">DESENVOLVIDO POR TOMSOFTWAR • Todos os Direitos Reservados • ©2026 • tomsoftwar@gmail.com</div></footer><script src="assets/js/site.js"></script><script src="assets/js/blog.js?v=2"></script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>BLOG DE TECNOLOGIA | TOM GAMES</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/style.css">
+
+  <style>
+    .technology-post {
+      background: #fff;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 15px rgba(0,0,0,.08);
+    }
+
+    .technology-post img {
+      width: 100%;
+      max-height: 360px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .technology-post h2 {
+      margin: 8px 0;
+    }
+
+    .technology-post .post-date {
+      display: block;
+      margin-bottom: 15px;
+      opacity: .7;
+    }
+
+    .post-content {
+      display: none;
+      margin-top: 20px;
+      line-height: 1.8;
+    }
+
+    .post-content h3 {
+      margin-top: 25px;
+    }
+
+    .post-content.open {
+      display: block;
+    }
+
+    .post-button {
+      margin-top: 10px;
+    }
+
+    .post-search-hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="header">
+
+  <div class="topbar container">
+
+    <a class="brand" href="index.html">
+
+      <span class="ghost" aria-hidden="true">
+        <i></i>
+        <i></i>
+        <b></b>
+      </span>
+
+      <span>
+        <strong>TOM GAMES</strong>
+        <small>ARCADE • TECNOLOGIA • NOSTALGIA</small>
+      </span>
+
+    </a>
+
+    <div class="header-actions">
+      <button class="icon-btn" id="themeBtn">◐</button>
+      <button class="menu-btn" id="menuBtn">☰</button>
+    </div>
+
+  </div>
+
+  <nav id="nav" class="nav container">
+
+    <a href="index.html">HOME</a>
+
+    <a class="active" href="blog.html">
+      BLOG DE TECNOLOGIA
+    </a>
+
+    <a href="quem-somos.html">QUEM SOMOS</a>
+
+    <a href="privacidade.html">PRIVACIDADE</a>
+
+    <a href="termos.html">TERMOS</a>
+
+    <a href="downloads.html">DOWNLOADS</a>
+
+    <a href="contato.html">CONTATO</a>
+
+  </nav>
+
+</header>
+
+
+<main class="container">
+
+  <section class="page-head">
+
+    <span class="kicker">
+      TOM GAMES • TECNOLOGIA
+    </span>
+
+    <h1>Blog de Tecnologia</h1>
+
+    <p class="lead">
+      Notícias, análises e artigos sobre tecnologia,
+      inovação, internet, inteligência artificial,
+      hardware, software e games.
+    </p>
+
+
+    <div class="blog-toolbar">
+
+      <input
+        id="blogSearch"
+        placeholder="Pesquisar artigos..."
+        aria-label="Pesquisar artigos">
+
+      <a class="btn red" href="admin/index.html">
+        🔐 ÁREA DO AUTOR
+      </a>
+
+    </div>
+
+
+    <div id="technologyPosts">
+
+
+      <!-- ============================= -->
+      <!-- POSTAGEM 1                     -->
+      <!-- ============================= -->
+
+      <article class="technology-post">
+
+        <!-- COLOQUE A IMAGEM DA POSTAGEM 1 AQUI -->
+
+        <img
+          src="imagens/blog/xbox-playstation.jpg"
+          alt="Xbox ou PlayStation">
+
+        <span class="tag">
+          TECNOLOGIA • GAMES
+        </span>
+
+        <h2>
+          XBOX OU PLAYSTATION?
+        </h2>
+
+        <small class="post-date">
+          24/09/2026
+        </small>
+
+        <p>
+          Uma comparação entre Xbox e PlayStation,
+          suas características, jogos, serviços e a
+          experiência que cada plataforma oferece aos jogadores.
+        </p>
+
+
+        <button
+          class="btn small post-button"
+          onclick="togglePost('post1', this)">
+
+          LER ARTIGO
+
+        </button>
+
+
+        <div id="post1" class="post-content">
+
+          <h3>🎮 XBOX OU PLAYSTATION?</h3>
+
+          <p>
+            Quando o assunto é videogame, poucas discussões
+            são tão tradicionais quanto Xbox ou PlayStation?
+            As duas plataformas conquistaram milhões de
+            jogadores ao longo dos anos e ajudaram a transformar
+            os videogames em uma das principais formas de
+            entretenimento do mundo.
+          </p>
+
+          <h3>🎮 PlayStation</h3>
+
+          <p>
+            A marca PlayStation, da Sony, possui uma longa
+            história no mercado de consoles. Desde o primeiro
+            PlayStation, lançado na década de 1990, a plataforma
+            ficou conhecida por seus jogos exclusivos e por
+            franquias que marcaram gerações.
+          </p>
+
+          <p>
+            Entre as séries mais conhecidas estão God of War,
+            Gran Turismo, The Last of Us, Uncharted, Spider-Man
+            e Horizon.
+          </p>
+
+          <h3>🟢 Xbox</h3>
+
+          <p>
+            O Xbox, da Microsoft, também construiu uma história
+            importante no mercado de games. A marca ficou
+            conhecida por franquias como Halo, Forza,
+            Gears of War e Microsoft Flight Simulator.
+          </p>
+
+          <p>
+            Um dos destaques do ecossistema Xbox é a integração
+            entre console, computador e serviços da Microsoft.
+            O Xbox Game Pass também se tornou uma parte importante
+            da estratégia da empresa.
+          </p>
+
+          <h3>⚔️ Duas propostas diferentes</h3>
+
+          <p>
+            Embora Xbox e PlayStation disputem o mesmo mercado,
+            as empresas adotam estratégias diferentes em vários
+            aspectos.
+          </p>
+
+          <p>
+            Alguns jogadores dão grande importância aos jogos
+            exclusivos do PlayStation, enquanto outros valorizam
+            a integração do Xbox com o PC, seus serviços e a
+            possibilidade de acessar jogos em diferentes dispositivos.
+          </p>
+
+          <h3>🕹️ E qual escolher?</h3>
+
+          <p>
+            Não existe uma resposta única para todos os jogadores.
+          </p>
+
+          <p>
+            A escolha pode depender dos jogos que você gosta,
+            dos amigos com quem joga, do orçamento disponível,
+            dos serviços que pretende utilizar e da plataforma
+            em que prefere jogar.
+          </p>
+
+          <p>
+            No final, tanto Xbox quanto PlayStation fazem parte
+            da história moderna dos videogames e continuam
+            contribuindo para a evolução da indústria.
+          </p>
+
+          <p>
+            <strong>
+              E você? Xbox ou PlayStation?
+            </strong>
+          </p>
+
+        </div>
+
+      </article>
+
+
+      <!-- ============================= -->
+      <!-- POSTAGEM 2                     -->
+      <!-- ============================= -->
+
+      <article class="technology-post">
+
+        <!-- COLOQUE A IMAGEM DA POSTAGEM 2 AQUI -->
+
+        <img
+          src="imagens/blog/celulares-dobraveis.jpg"
+          alt="Celulares dobráveis">
+
+        <span class="tag">
+          TECNOLOGIA • SMARTPHONES
+        </span>
+
+        <h2>
+          A ERA DOS CELULARES DOBRÁVEIS
+        </h2>
+
+        <small class="post-date">
+          24/09/2026
+        </small>
+
+        <p>
+          Os celulares dobráveis transformaram o design
+          dos smartphones ao combinar telas maiores,
+          mobilidade e novas formas de interação com a tecnologia.
+        </p>
+
+
+        <button
+          class="btn small post-button"
+          onclick="togglePost('post2', this)">
+
+          LER ARTIGO
+
+        </button>
+
+
+        <div id="post2" class="post-content">
+
+          <h3>📱 A ERA DOS CELULARES DOBRÁVEIS</h3>
+
+          <p>
+            Durante muitos anos, os celulares seguiram
+            praticamente a mesma fórmula: uma tela rígida,
+            cada vez maior, instalada em um aparelho cada
+            vez mais fino.
+          </p>
+
+          <p>
+            Mas a evolução da tecnologia trouxe uma nova
+            possibilidade: dobrar a tela.
+          </p>
+
+          <h3>📱 Dois formatos principais</h3>
+
+          <p>
+            Atualmente, os dobráveis podem ser encontrados
+            principalmente em dois formatos.
+          </p>
+
+          <p>
+            Os modelos tipo livro possuem uma tela externa
+            para tarefas rápidas e, quando abertos, revelam
+            uma tela interna muito maior.
+          </p>
+
+          <p>
+            Já os modelos tipo concha possuem um formato
+            compacto quando fechados. Ao serem abertos,
+            transformam-se em um smartphone tradicional.
+          </p>
+
+          <h3>🔧 Como uma tela consegue dobrar?</h3>
+
+          <p>
+            O desenvolvimento dos celulares dobráveis exigiu
+            avanços importantes em diferentes componentes.
+          </p>
+
+          <p>
+            As telas flexíveis utilizam tecnologias capazes
+            de suportar milhares de movimentos de abertura
+            e fechamento.
+          </p>
+
+          <p>
+            As dobradiças também são fundamentais, pois
+            precisam permitir o movimento sem comprometer
+            a estrutura do aparelho.
+          </p>
+
+          <h3>🚀 Muito além da novidade</h3>
+
+          <p>
+            Uma tela maior pode facilitar a leitura de
+            documentos, edição de imagens, navegação na
+            internet e utilização de vários aplicativos
+            simultaneamente.
+          </p>
+
+          <h3>⚠️ Os desafios</h3>
+
+          <p>
+            Apesar da evolução, os dobráveis ainda apresentam
+            desafios.
+          </p>
+
+          <p>
+            Preço, resistência, peso, duração da bateria e
+            durabilidade das telas e dobradiças são alguns
+            dos aspectos que continuam sendo observados
+            pelos consumidores.
+          </p>
+
+          <h3>🔮 O futuro dos smartphones?</h3>
+
+          <p>
+            Os celulares dobráveis mostram que o formato
+            tradicional dos smartphones não precisa ser o
+            único caminho para o futuro.
+          </p>
+
+          <p>
+            À medida que as telas flexíveis, dobradiças e
+            baterias evoluem, novas possibilidades podem surgir.
+          </p>
+
+          <p>
+            Uma coisa já está clara: a tecnologia dos
+            smartphones está deixando de ser apenas sobre
+            aumentar a tela e começando a explorar novas
+            maneiras de transformar sua própria forma.
+          </p>
+
+          <p>
+            <strong>
+              Você usaria um celular dobrável?
+            </strong>
+          </p>
+
+        </div>
+
+      </article>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<footer>
+
+  <div class="container footer-grid">
+
+    <div>
+
+      <div class="footer-brand">
+        TOM GAMES
+      </div>
+
+      <p>
+        Preservando a cultura gamer e acompanhando
+        o futuro da tecnologia.
+      </p>
+
+    </div>
+
+    <div>
+
+      <b>NAVEGAÇÃO</b>
+
+      <a href="index.html">Home</a>
+
+      <a href="blog.html">
+        Blog de Tecnologia
+      </a>
+
+      <a href="downloads.html">
+        Downloads
+      </a>
+
+    </div>
+
+    <div>
+
+      <b>LEGAL</b>
+
+      <a href="privacidade.html">
+        Privacidade
+      </a>
+
+      <a href="termos.html">
+        Termos de Uso
+      </a>
+
+      <a href="contato.html">
+        Contato
+      </a>
+
+    </div>
+
+  </div>
+
+  <div class="copyright">
+    DESENVOLVIDO POR TOMSOFTWAR • Todos os Direitos Reservados • ©2026 • tomsoftwar@gmail.com
+  </div>
+
+</footer>
+
+
+<script src="assets/js/site.js"></script>
+
+
+<script>
+
+function togglePost(id, button) {
+
+  const post = document.getElementById(id);
+
+  if (!post) return;
+
+  if (post.classList.contains('open')) {
+
+    post.classList.remove('open');
+
+    button.textContent = 'LER ARTIGO';
+
+  } else {
+
+    post.classList.add('open');
+
+    button.textContent = 'FECHAR ARTIGO';
+
+    post.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+
+  }
+
+}
+
+
+const search = document.getElementById('blogSearch');
+
+if (search) {
+
+  search.addEventListener('input', function () {
+
+    const term =
+      search.value.toLowerCase().trim();
+
+    document
+      .querySelectorAll('.technology-post')
+      .forEach(function (post) {
+
+        const text =
+          post.textContent.toLowerCase();
+
+        post.classList.toggle(
+          'post-search-hidden',
+          term && !text.includes(term)
+        );
+
+      });
+
+  });
+
+}
+
+</script>
+
+</body>
+</html>
