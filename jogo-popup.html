@@ -1,31 +1,93 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TOM GAMES — Jogo</title><link rel="stylesheet" href="assets/css/style.css"><style>html,body{margin:0;min-height:100%;background:#080808;color:#fff;overflow:hidden;overscroll-behavior:none;position:fixed;width:100%;height:100%}body{display:flex;flex-direction:column;align-items:center;padding:14px;box-sizing:border-box}.popup-head{width:min(760px,100%);display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.popup-head h1{font-size:16px;margin:0;color:#e31b2b}.popup-head button{background:#111;border:2px solid #e31b2b;color:#fff;padding:8px 10px;cursor:pointer;font-weight:700}.popup-wrap{width:min(760px,100%)}canvas{display:block;width:100%;height:auto;border:3px solid #333;image-rendering:pixelated;background:#000}.game-frame{display:block;width:100%;height:720px;border:3px solid #333;background:#000;box-sizing:border-box}.river-frame-wrap{width:min(760px,100%);display:flex;justify-content:center}.mobile-frame-wrap{position:relative;width:min(760px,100%);height:min(720px,calc(100vh - 90px));display:flex;justify-content:center;align-items:flex-start}.mobile-game-frame{width:100%;height:100%;border:3px solid #333;background:#000}.synopsis-lock{position:absolute;inset:0;z-index:20;background:rgba(0,0,0,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;box-sizing:border-box}.synopsis-title{font:22px "Press Start 2P",monospace;color:#e31b2b;margin-bottom:30px}.synopsis-text{max-width:650px;font:700 18px/1.7 monospace;color:#fff}.synopsis-count{margin-top:28px;font:12px monospace;color:#35c76f}.hint{text-align:center;font:11px monospace;color:#aaa;margin:10px 0}.locked{cursor:wait}</style></head><body><div class="popup-head"><h1 id="gameTitle">TOM GAMES</h1><button onclick="window.close()">✕ FECHAR</button></div><div class="popup-wrap" id="gameHost"><canvas id="gameCanvas" width="760" height="480" tabindex="0"></canvas></div><div class="hint" id="hint">SINOPSE • AGUARDE O FINAL DA INTRODUÇÃO</div><script>document.addEventListener('keydown',e=>{if(e.key==='Escape')window.close()});const map={invaders:['invaders','INVADERS'],snake:['snake','COBRINHA'],pacbang:['pacbang','PAC BANG'],joaoMaria:['joaoMaria','JOÃO E MARIA'],racha:['racha','RACHA'],alienFort:['alienFort','ALIEN FORT'],dangerRiver:['dangerRiver','DANGER RIVER'],cityAttack:['cityAttack','CITY ATTACK'],littleJoe:['littleJoe','LITTLE JOE'],megaspace:['megaspace','MEGASPACE'],ninjaShin:['ninjaShin','NINJA SHIN'],pong:['pong','PONG']};const q=new URLSearchParams(location.search).get('game')||'invaders';const [id,title]=map[q]||map.invaders;document.getElementById('gameTitle').textContent='TOM GAMES — '+title;const cv=document.getElementById('gameCanvas');cv.id=id;let introLock=true;function blockDuringIntro(e){if(!introLock)return;if(e.key==='Escape')return;e.preventDefault();e.stopImmediatePropagation();if(e.type==='keydown'||e.type==='keyup')e.stopPropagation();}document.addEventListener('keydown',blockDuringIntro,true);document.addEventListener('keyup',blockDuringIntro,true);document.addEventListener('pointerdown',e=>{if(introLock){e.preventDefault();e.stopImmediatePropagation();}},true);document.addEventListener('pointerup',e=>{if(introLock){e.preventDefault();e.stopImmediatePropagation();}},true);document.addEventListener('click',e=>{if(introLock){e.preventDefault();e.stopImmediatePropagation();}},true);</script><script src="assets/js/games.js"></script><script src="assets/js/games_city_attack.js"></script><script src="assets/js/games_little_joe.js"></script><script src="assets/js/games_megaspace.js"></script><script>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><title>TOM GAMES — Jogo</title><link rel="stylesheet" href="assets/css/style.css"><style>
+:root{--red:#e31b2b}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#080808;color:#fff;overflow:hidden;overscroll-behavior:none}body{display:flex;flex-direction:column;align-items:center;padding:8px env(safe-area-inset-right,8px) calc(8px + env(safe-area-inset-bottom,0)) env(safe-area-inset-left,8px);font-family:Inter,Arial,sans-serif}.popup-head{width:min(900px,100%);height:36px;flex:0 0 36px;display:flex;justify-content:space-between;align-items:center;gap:8px}.popup-head h1{font:700 13px monospace;color:var(--red);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.popup-head button{background:#111;border:2px solid var(--red);color:#fff;padding:6px 9px;font-weight:700;touch-action:manipulation}.popup-wrap{position:relative;width:min(900px,100%);height:calc(100dvh - 70px);display:flex;align-items:center;justify-content:center;overflow:hidden}.popup-wrap>canvas{display:block;width:auto;height:auto;max-width:100%;max-height:100%;border:3px solid #333;background:#000;image-rendering:pixelated;touch-action:none}.game-frame{display:block;width:100%;height:100%;border:3px solid #333;background:#000}.river-frame-wrap,.mobile-frame-wrap{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}.river-frame-wrap iframe{width:min(600px,100%);height:min(500px,100%);border:3px solid #333;background:#000;aspect-ratio:600/500}.mobile-game-frame{width:min(720px,100%);height:min(540px,100%);border:3px solid #333;background:#000;aspect-ratio:4/3}.start-screen,.intro-guard{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;text-align:center;background:rgba(0,0,0,.88);padding:16px;touch-action:none}.intro-guard{z-index:25;background:rgba(0,0,0,0);display:none;pointer-events:none}.start-card{width:min(560px,94%);border:3px solid #333;background:#090909;padding:20px 16px;box-shadow:0 0 0 2px rgba(227,27,43,.12)}.start-title{font:20px 'Press Start 2P',monospace;color:var(--red);margin-bottom:16px}.start-text{font:700 14px/1.6 monospace;margin-bottom:16px}.start-button{display:inline-flex;align-items:center;justify-content:center;min-width:210px;min-height:50px;padding:10px 16px;border:3px solid #fff;background:var(--red);color:#fff;font:700 12px monospace;touch-action:manipulation}.hint{width:min(900px,100%);height:24px;flex:0 0 24px;text-align:center;font:10px/24px monospace;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}@media(max-width:600px){.popup-head{height:32px;flex-basis:32px}.popup-head h1{font-size:11px}.popup-head button{font-size:10px;padding:5px 7px}.popup-wrap{height:calc(100dvh - 58px)}.start-title{font-size:15px}.start-text{font-size:11px}.start-button{min-width:190px;min-height:46px;font-size:11px}.hint{display:none}}@media(orientation:landscape) and (max-height:520px){.popup-head{height:28px;flex-basis:28px}.popup-wrap{height:calc(100dvh - 38px)}.start-card{padding:11px}.start-title{font-size:13px;margin-bottom:7px}.start-text{font-size:10px;margin-bottom:7px}.start-button{min-height:38px}}
+.touch-controls{position:absolute;left:0;right:0;bottom:6px;z-index:20;display:none;justify-content:space-between;align-items:flex-end;padding:0 10px;pointer-events:none}.touch-cluster{display:flex;gap:8px;align-items:center}.touch-btn{width:54px;height:54px;border:2px solid #fff;background:rgba(20,20,20,.78);color:#fff;border-radius:10px;font:bold 18px monospace;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;touch-action:none;pointer-events:auto;box-shadow:2px 2px 0 #000}.touch-btn.action{background:rgba(180,0,20,.88);width:62px}.touch-btn:active{transform:scale(.94);background:#e31b2b}.touch-label{font:9px monospace;color:#fff;background:rgba(0,0,0,.65);padding:3px 5px;border:1px solid #444}@media(max-width:900px),(pointer:coarse){.touch-controls{display:flex}}@media(min-width:901px) and (pointer:fine){.touch-controls{display:none}}@media(max-width:600px){.touch-btn{width:48px;height:48px;font-size:16px}.touch-btn.action{width:56px}.touch-controls{padding:0 6px;bottom:4px}}</style></head><body><div class="popup-head"><h1 id="gameTitle">TOM GAMES</h1><button id="closeBtn" type="button">✕ FECHAR</button></div><div class="popup-wrap" id="gameHost"><canvas id="gameCanvas" width="760" height="480" tabindex="0"></canvas><div class="start-screen" id="startScreen"><div class="start-card"><div class="start-title" id="startTitle">TOM GAMES</div><div class="start-text">TOQUE NA TELA OU APERTE ENTER PARA INICIAR</div><button class="start-button" id="startButton" type="button">▶ INICIAR JOGO</button></div></div><div class="intro-guard" id="introGuard"></div></div><div class="hint" id="hint">TOQUE NA TELA OU APERTE ENTER • JOGO RESPONSIVO</div>
+<script>
 (function(){
-  let controller=null;
-  if(id==='dangerRiver'){
-    const host=document.getElementById('gameHost');
-    host.innerHTML='<div class=\"river-frame-wrap\"><iframe class=\"game-frame\" src=\"assets/games/danger-river.html\" title=\"DANGER RIVER\" allow=\"autoplay\" scrolling=\"no\" frameborder=\"0\"></iframe></div>';
-    const frame=host.querySelector('iframe'); if(frame){ frame.addEventListener('load',()=>{ try{ const d=frame.contentDocument; d.documentElement.style.overflow='hidden'; d.body.style.overflow='hidden'; d.documentElement.style.overscrollBehavior='none'; d.body.style.overscrollBehavior='none'; d.addEventListener('keydown',e=>{ if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)){ e.preventDefault(); }},true); d.addEventListener('keyup',e=>{ if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)){ e.preventDefault(); }},true); }catch(e){} }); }introLock=false;
-    document.getElementById('hint').textContent='DANGER RIVER V2 • USE O MENU DO JOGO PARA INICIAR';
-    return;
-  } else if(id==='cityAttack'){
-    window.cityAttackGame=new CityAttack(document.getElementById('cityAttack')); controller=window.cityAttackGame; controller.activate();
-  } else if(id==='littleJoe'){
-    initLittleJoe(document.getElementById('littleJoe')); controller=window.littleJoeGame; controller.activate();
-  } else if(id==='megaspace'){
-    controller=initMegaSpace(document.getElementById('megaspace')); controller.activate();
-  } else if(id==='ninjaShin' || id==='pong'){
-    const host=document.getElementById('gameHost');
-    const src=id==='ninjaShin'?'assets/games/ninja-shin.html?tomIntro=1':'assets/games/pong.html?tomIntro=1';
-    const label=id==='ninjaShin'?'NINJA SHIN':'PONG';
-    const synopsis=id==='ninjaShin'?'SHIN É UM NINJA ÁGIL QUE PRECISA DERROTAR INIMIGOS, SUPERAR OBSTÁCULOS E VENCER OS NÍVEIS!':'DOMINE A BOLA, VENÇA SEU ADVERSÁRIO E REVIVA O PONG CLÁSSICO EM ESTILO ATARI 2600!';
-    host.innerHTML='<div class=\"mobile-frame-wrap\"><iframe class=\"game-frame mobile-game-frame\" src=\"'+src+'\" title=\"'+label+'\" allow=\"autoplay\" scrolling=\"no\" frameborder=\"0\"></iframe><div id=\"synopsisLock\" class=\"synopsis-lock\"><div class=\"synopsis-title\">'+label+'</div><div class=\"synopsis-text\">'+synopsis+'</div><div class=\"synopsis-count\">O JOGO COMEÇARÁ APÓS A SINOPSE...</div></div></div>';
-    introLock=true;
-    const frame=host.querySelector('iframe'); const lock=host.querySelector('#synopsisLock');
-    setTimeout(()=>{ introLock=false; if(lock) lock.remove(); document.getElementById('hint').textContent='CONTROLES ATIVOS • BOM JOGO!'; try{frame.contentWindow.focus();}catch(e){} },5000);
-    return;
-  } else {
-    switchGame(q); const g=window[{invaders:'invadersGame',snake:'snakeGame',pacbang:'pacBangGame',joaoMaria:'joaoMariaGame',racha:'rachaGame',alienFort:'alienFortGame',dangerRiver:'dangerRiverGame'}[q]]; controller=g; if(g&&typeof g.start==='function')g.start();
-  }
-  const check=()=>{let intro=false;if(controller){if(typeof controller.isIntro==='function')intro=controller.isIntro();else if(controller.intro===true&&controller.running===false)intro=true;}if(!intro){introLock=false;document.getElementById('hint').textContent='CONTROLES ATIVOS • BOM JOGO!';}else setTimeout(check,50);};check();
-  document.getElementById(id).focus();
-})();</script></body></html>
+ const map={invaders:['invaders','INVADERS'],snake:['snake','COBRINHA'],pacbang:['pacbang','PAC BANG'],joaoMaria:['joaoMaria','JOÃO E MARIA'],racha:['racha','RACHA'],alienFort:['alienFort','ALIEN FORT'],dangerRiver:['dangerRiver','DANGER RIVER'],cityAttack:['cityAttack','CITY ATTACK'],littleJoe:['littleJoe','LITTLE JOE'],megaspace:['megaspace','MEGASPACE'],ninjaShin:['ninjaShin','NINJA SHIN'],pong:['pong','PONG']};
+ const controllers={invaders:'invadersGame',snake:'snakeGame',pacbang:'pacBangGame',joaoMaria:'joaoMariaGame',racha:'rachaGame',alienFort:'alienFortGame'};
+ const q=new URLSearchParams(location.search).get('game')||'invaders', pair=map[q]||map.invaders, id=pair[0], title=pair[1];
+ const host=document.getElementById('gameHost'), hint=document.getElementById('hint');
+ document.getElementById('gameTitle').textContent='TOM GAMES — '+title;
+ document.getElementById('startTitle').textContent=title;
+ document.getElementById('closeBtn').onclick=()=>{chipStop();window.close();};
+ let controller=null,frame=null,started=false;
+ function load(src){return new Promise((resolve,reject)=>{const x=document.createElement('script');x.src=src;x.onload=resolve;x.onerror=reject;document.body.appendChild(x);});}
+ function makeStartUI(){const ss=host.querySelector('#startScreen'),sb=host.querySelector('#startButton');if(ss)ss.addEventListener('pointerdown',e=>{if(e.target!==sb){e.preventDefault();startGame();}},{passive:false});if(sb)sb.addEventListener('click',e=>{e.preventDefault();startGame();});}
+ function sendFrameKey(key,code){try{const w=frame&&frame.contentWindow;if(!w)return;const target=w.document||w;target.dispatchEvent(new KeyboardEvent('keydown',{key,code:code||key,bubbles:true,cancelable:true}));target.dispatchEvent(new KeyboardEvent('keyup',{key,code:code||key,bubbles:true,cancelable:true}));}catch(e){}}
+ function clickIframeStart(){
+   try{
+     if(frame&&frame.contentWindow){
+       frame.contentWindow.postMessage({type:'tomgames-start'},'*');
+       setTimeout(()=>{try{sendFrameKey('Enter','Enter');}catch(e){}},30);
+       return;
+     }
+   }catch(e){}
+ }
+ function introDone(){if(!started)return;let intro=false;try{if(controller&&typeof controller.isIntro==='function')intro=controller.isIntro();else if(controller&&controller.intro===true&&controller.running===false)intro=true;}catch(e){}const guard=host.querySelector('#introGuard');if(guard){guard.style.display='none';guard.style.pointerEvents='none';}hint.textContent=intro?'INTRODUÇÃO • AGUARDE O FINAL PARA CONTROLAR':'CONTROLES ATIVOS • BOM JOGO!';if(intro)setTimeout(introDone,100)}
+ const chip={ctx:null,gain:null,timer:null,step:0,enabled:false,mel:[659,784,988,784,659,523,587,659,880,988,1175,988,880,784,659,587]};
+ function chipStart(){
+   try{const A=window.AudioContext||window.webkitAudioContext;if(!A)return;
+     if(!chip.ctx) {chip.ctx=new A();chip.gain=chip.ctx.createGain();chip.gain.gain.value=.060;chip.gain.connect(chip.ctx.destination);}
+     chip.ctx.resume();chip.enabled=true;if(chip.timer)return;
+     const tick=()=>{if(!chip.enabled)return;const o=chip.ctx.createOscillator(),g=chip.ctx.createGain();o.type='square';o.frequency.value=chip.mel[chip.step%chip.mel.length];g.gain.setValueAtTime(.0001,chip.ctx.currentTime);g.gain.exponentialRampToValueAtTime(.16,chip.ctx.currentTime+.008);g.gain.exponentialRampToValueAtTime(.0001,chip.ctx.currentTime+.12);o.connect(g);g.connect(chip.gain);o.start();o.stop(chip.ctx.currentTime+.13);chip.step++;};
+     tick();chip.timer=setInterval(tick,180);
+   }catch(e){}
+ }
+ function chipStop(){if(chip.timer){clearInterval(chip.timer);chip.timer=null;}chip.enabled=false;if(chip.ctx&&chip.master){try{chip.master.gain.setTargetAtTime(0,chip.ctx.currentTime,.03)}catch(e){}}}
+ function startGame(){if(started)return;started=true;chipStart();const ss=host.querySelector('#startScreen');if(ss)ss.style.display='none';const guard=host.querySelector('#introGuard');if(guard){guard.style.display='none';guard.style.pointerEvents='none';}hint.textContent='INTRODUÇÃO • AGUARDE O FINAL PARA CONTROLAR';try{if(id==='dangerRiver'||id==='ninjaShin'||id==='pong'){clickIframeStart();}else if(controller){if(window.switchGame)window.switchGame(id==='pacbang'?'pacBang':q);if(id==='pacbang'&&window.pacBangGame){controller=window.pacBangGame;controller.active=true;controller.last=performance.now();controller.start();if(!controller.raf)controller.raf=requestAnimationFrame(e=>controller.loop(e));}else if(controller&&typeof controller.start==='function')controller.start();else if(controller&&typeof controller.activate==='function')controller.activate();}}catch(e){console.error(e)}createTouchControls();introDone();try{(frame?frame.contentWindow:document.getElementById(id)).focus()}catch(e){}}
+ function createTouchControls(){
+   if(host.querySelector('.touch-controls'))return;
+   const wrap=document.createElement('div');wrap.className='touch-controls';wrap.setAttribute('aria-label','Controles touch');
+   const left=document.createElement('div');left.className='touch-cluster';
+   const right=document.createElement('div');right.className='touch-cluster';
+   const specs={
+     invaders:[['←','ArrowLeft'],['→','ArrowRight'],['ATIRAR','a']],
+     snake:[['↑','ArrowUp'],['←','ArrowLeft'],['→','ArrowRight'],['↓','ArrowDown']],
+     pacbang:[['←','ArrowLeft'],['→','ArrowRight'],['TIRO','a'],['BOMBA','Space']],
+     joaoMaria:[['←','ArrowLeft'],['→','ArrowRight'],['PULAR','Space'],['↓','ArrowDown']],
+     racha:[['←','ArrowLeft'],['→','ArrowRight']],
+     alienFort:[['↑','ArrowUp'],['←','ArrowLeft'],['→','ArrowRight'],['↓','ArrowDown']],
+     cityAttack:[['←','ArrowLeft'],['→','ArrowRight'],['ATIRAR','Space']],
+     littleJoe:[['←','ArrowLeft'],['→','ArrowRight'],['PULAR','Space'],['↓','ArrowDown']],
+     megaspace:[['←','ArrowLeft'],['→','ArrowRight'],['ATIRAR','Space']],
+     dangerRiver:[['←','ArrowLeft'],['→','ArrowRight'],['↑','ArrowUp'],['↓','ArrowDown'],['ATIRAR','Space']],
+     ninjaShin:[['←','ArrowLeft'],['▼','ArrowDown'],['→','ArrowRight'],['PULAR','KeyX'],['SHURI','KeyZ'],['PODER','KeyC']],
+     pong:[['←','ArrowLeft'],['→','ArrowRight']]
+   };
+   const items=specs[id]||[];
+   items.forEach(([label,key],i)=>{const b=document.createElement('button');b.type='button';b.className='touch-btn'+(label==='ATIRAR'||label==='BOMBA'||label==='PULAR'?' action':'');b.textContent=label;b.setAttribute('aria-label',label);const down=e=>{e.preventDefault();e.stopPropagation();sendControl(key,'down')};const up=e=>{e.preventDefault();e.stopPropagation();sendControl(key,'up')};b.addEventListener('pointerdown',down,{passive:false});b.addEventListener('pointerup',up,{passive:false});b.addEventListener('pointercancel',up,{passive:false});b.addEventListener('pointerleave',up,{passive:false});(label.includes('ATIRAR')||label==='BOMBA'||label==='PULAR'?right:left).appendChild(b);});
+   if(frame && (id==='dangerRiver'||id==='ninjaShin'||id==='pong')){wrap.style.zIndex='40';}
+   wrap.append(left,right);host.appendChild(wrap);
+ }
+ function sendControl(key,phase){
+   const code=key==='Space'?'Space':key;
+   try{
+     if(frame){const d=frame.contentDocument,w=frame.contentWindow;if(!d||!w)return;d.dispatchEvent(new KeyboardEvent(phase==='down'?'keydown':'keyup',{key:key==='Space'?' ':key,code,bubbles:true,cancelable:true}));}
+     else {document.dispatchEvent(new KeyboardEvent(phase==='down'?'keydown':'keyup',{key:key==='Space'?' ':key,code,bubbles:true,cancelable:true}));}
+   }catch(e){}
+ }
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){window.close();return}if(e.key==='Enter'&&!started){e.preventDefault();startGame()}});
+ async function init(){
+   if(id==='dangerRiver'){
+     host.innerHTML='<div class="river-frame-wrap"><iframe class="game-frame" src="assets/games/danger-river.html" title="DANGER RIVER" allow="autoplay" scrolling="no" frameborder="0"></iframe><div class="start-screen" id="startScreen"><div class="start-card"><div class="start-title">DANGER RIVER</div><div class="start-text">TOQUE NA TELA OU APERTE ENTER PARA INICIAR</div><button class="start-button" id="startButton" type="button">▶ INICIAR JOGO</button></div></div><div class="intro-guard" id="introGuard"></div></div>';frame=host.querySelector('iframe'); frame.addEventListener('load',()=>{ if(started) setTimeout(clickIframeStart,50); });
+   }else if(id==='ninjaShin'||id==='pong'){
+     host.innerHTML='<div class="mobile-frame-wrap"><iframe class="game-frame mobile-game-frame" src="assets/games/'+(id==='ninjaShin'?'ninja-shin.html':'pong.html')+'?tomIntro=1" title="'+title+'" allow="autoplay" scrolling="no" frameborder="0"></iframe><div class="start-screen" id="startScreen"><div class="start-card"><div class="start-title">'+title+'</div><div class="start-text">TOQUE NA TELA OU APERTE ENTER PARA INICIAR</div><button class="start-button" id="startButton" type="button">▶ INICIAR JOGO</button></div></div><div class="intro-guard" id="introGuard"></div></div>';frame=host.querySelector('iframe');
+   }else{
+     const cv=document.getElementById('gameCanvas');cv.id=id;
+     await load('assets/js/games.js');
+     if(id==='cityAttack') await load('assets/js/games_city_attack.js');
+     if(id==='littleJoe') await load('assets/js/games_little_joe.js');
+     if(id==='megaspace') await load('assets/js/games_megaspace.js');
+     controller=window[controllers[q]]||null;
+     if(id==='cityAttack'){controller=window.cityAttackGame||new CityAttack(document.getElementById(id));}
+     else if(id==='littleJoe'){if(typeof initLittleJoe==='function')initLittleJoe(document.getElementById(id));controller=window.littleJoeGame;}
+     else if(id==='megaspace'){if(typeof initMegaSpace==='function')controller=initMegaSpace(document.getElementById(id));}
+   }
+   makeStartUI();
+   if(frame)
+frame.addEventListener('load',()=>{try{const d=frame.contentDocument;d.documentElement.style.overflow='hidden';d.body.style.overflow='hidden';d.documentElement.style.overscrollBehavior='none';d.body.style.overscrollBehavior='none';if(id==='ninjaShin'){const c=d.getElementById('controls');if(c)c.style.display='none';const st=d.getElementById('start-btn');if(st)st.style.display='none';}if(id==='pong'){const c=d.getElementById('mobile-controls');if(c)c.style.display='none';const st=d.getElementById('startBtn');if(st)st.style.display='none';}if(started)clickIframeStart()}catch(e){}});
+ }
+ init().catch(e=>{console.error(e);hint.textContent='ERRO AO CARREGAR O JOGO';});
+ window.tomPopupStart=startGame;
+})();
+</script></body></html>
