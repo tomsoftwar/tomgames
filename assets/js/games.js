@@ -393,6 +393,21 @@ class PacBang{
   }
   bind(){
     const activate=()=>{switchGame('pacbang');this.c.focus({preventScroll:true});music.start();};
+
+    // O popup do TOM GAMES também pode receber o 'click' gerado
+    // automaticamente depois de um toque. Depois que o PAC BANG
+    // estiver ativo, esse click NÃO pode voltar para o popup nem
+    // disparar um novo START. Usamos captura no document para
+    // bloquear o evento antes que ele chegue aos elementos externos.
+    this._suppressExternalClick=(e)=>{
+      if(window.tomActiveGame!=='pacbang')return;
+      if(e.target===this.c || this.c.contains(e.target)){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      }
+    };
+    document.addEventListener('click',this._suppressExternalClick,true);
+
     let lastPointerStart=0;
     window.addEventListener('keydown',e=>{
       const k=e.key.toLowerCase();
@@ -422,19 +437,23 @@ class PacBang{
         try{this.c.setPointerCapture(e.pointerId);}catch(err){}
       }
     },{passive:false});
+    // NÃO usar click para iniciar o jogo. O início é feito somente por
+    // pointerdown/ENTER. Isso elimina o segundo disparo no celular.
     this.c.addEventListener('click',e=>{
       e.preventDefault();
-      e.stopPropagation();
-      // The click generated after pointerdown must never start the game a second time.
-      if(performance.now()-lastPointerStart<700)return;
-      activate();
-      if(!this.running&&!this.introStarted)this.start();
+      e.stopImmediatePropagation();
     },{passive:false});
     this.c.addEventListener('pointermove',e=>{if(e.pointerType==='touch'&&this.touchX!=null&&this.running){const r=this.c.getBoundingClientRect();this.player.x=clamp((e.clientX-r.left)/r.width*this.c.width,34,this.c.width-34);}});
     this.c.addEventListener('pointerup',e=>{if(e.pointerType==='touch')this.touchX=null;});
     this.c.addEventListener('pointercancel',()=>this.touchX=null);
   }
-  deactivate(){this.running=false;this.intro=false;this.introStarted=false;this.keys={};this.touchX=null;}
+  deactivate(){
+    this.running=false;this.intro=false;this.introStarted=false;this.keys={};this.touchX=null;
+    if(this._suppressExternalClick){
+      document.removeEventListener('click',this._suppressExternalClick,true);
+      this._suppressExternalClick=null;
+    }
+  }
   start(){
     if(this.victory||this.lives<=0){this.resetAll();}
     this.running=false; this.demo=false; this.intro=true; this.introStarted=true; this.introDone=false; this.creditsY=this.c.height+80; if(this.energy<=0)this.energy=100; music.start(); this.last=performance.now();
