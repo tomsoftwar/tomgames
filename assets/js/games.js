@@ -45,7 +45,7 @@ class Invaders{
  constructor(c){this.c=c;this.ctx=c.getContext('2d');this.ctx.imageSmoothingEnabled=false;this.resetAll();this.bind();this.loop(0);}
  resetAll(){this.score=0;this.lives=3;this.level=1;this.energy=100;this.running=false;this.demo=true;this.victory=false;this.shield=0;this.intro=true;this.introY=this.c.height+80;this.introDone=false;this.introStarted=false;this.ship={x:this.c.width/2,y:this.c.height-55,tilt:0};this.bullets=[];this.enemyBullets=[];this.explosions=[];this.waveDir=1;this.waveDrop=0;this.waveSpeed=45;this.lastEnemyShot=0;this.invaderAnim=0;this.boss=null;this.bossBullets=[];this.bossFlash=0;this.make();}
  make(){this.aliens=[];const rows=Math.min(6,3+this.level),cols=8,gapX=82,gapY=38,startX=(this.c.width-(cols-1)*gapX)/2;const colors=['#d83cff','#20b8ff','#ff7a00','#74d61d','#ffda00'];for(let r=0;r<rows;r++)for(let col=0;col<cols;col++){const type=(r+this.level-1)%4;this.aliens.push({x:startX+col*gapX,y:72+r*gapY,baseY:72+r*gapY,alive:true,type,row:r,col,hp:type===3?2:1,color:colors[r%colors.length],phase:Math.random()*6.28});}this.waveDir=1;this.waveDrop=0;this.waveSpeed=42+this.level*14;}
- bind(){this.keys={};this.c.tabIndex=0;const activate=()=>{switchGame('invaders');this.c.focus();music.start();};this.c.addEventListener('pointerdown',e=>{activate();if(e.pointerType==='touch'){this.touching=true;}this.start();});this.c.addEventListener('pointermove',e=>{if(e.pointerType==='touch'&&this.touching){const r=this.c.getBoundingClientRect();this.ship.x=clamp((e.clientX-r.left)/r.width*this.c.width,34,this.c.width-34);if(this.running)this.fire();}});this.c.addEventListener('pointerup',e=>{if(e.pointerType==='touch')this.touching=false;});this.c.addEventListener('pointercancel',()=>this.touching=false);window.addEventListener('keydown',e=>{if(window.tomActiveGame!=='invaders')return;const k=e.key.toLowerCase();if(['arrowleft','arrowright','arrowup','arrowdown','a',' '].includes(k))e.preventDefault();this.keys[k]=true;if(k===' ') {activate();this.start();}if(k==='a')this.fire();});window.addEventListener('keyup',e=>{if(window.tomActiveGame==='invaders')delete this.keys[e.key.toLowerCase()];});}
+ bind(){this.keys={};this.c.tabIndex=0;const activate=()=>{switchGame('invaders');this.c.focus();music.start();};this.c.addEventListener('pointerdown',e=>{activate();if(e.pointerType==='touch'){this.touching=true;}if(!this.running&&!this.introStarted)this.start();});this.c.addEventListener('pointermove',e=>{if(e.pointerType==='touch'&&this.touching){const r=this.c.getBoundingClientRect();this.ship.x=clamp((e.clientX-r.left)/r.width*this.c.width,34,this.c.width-34);if(this.running)this.fire();}});this.c.addEventListener('pointerup',e=>{if(e.pointerType==='touch')this.touching=false;});this.c.addEventListener('pointercancel',()=>this.touching=false);window.addEventListener('keydown',e=>{if(window.tomActiveGame!=='invaders')return;const k=e.key.toLowerCase();if(['arrowleft','arrowright','arrowup','arrowdown','a',' '].includes(k))e.preventDefault();this.keys[k]=true;if(k===' ') {activate();if(!this.running&&!this.introStarted)this.start();}if(k==='a')this.fire();});window.addEventListener('keyup',e=>{if(window.tomActiveGame==='invaders')delete this.keys[e.key.toLowerCase()];});}
  deactivate(){this.running=false;this.intro=false;this.introStarted=false;this.keys={};}
  start(){if(this.victory||this.lives<=0){this.resetAll();}this.running=false;this.demo=false;this.intro=true;this.introDone=false;this.introStarted=true;this.introY=this.c.height+55;this.victory=false;if(this.energy<=0)this.energy=100;music.start();}
  fire(){if(!this.running||this.bullets.length>=8)return;this.bullets.push({x:this.ship.x,y:this.ship.y-28,v:-590});music.shoot();}
@@ -81,7 +81,7 @@ class Snake{
  constructor(c){this.c=c;this.ctx=c.getContext("2d");this.ctx.imageSmoothingEnabled=false;this.running=false;this.demo=true;this.lives=3;this.score=0;this.intro=true;this.introY=this.c.height+70;this.introDone=false;this.introSpeed=0;this.introStarted=false;this.introElapsed=0;this.introDuration=5;this.dir={x:1,y:0};this.next={x:1,y:0};this.last=0;this.demoTime=0;this.reset();this.bind();this.loop(0)}
  reset(){this.snake=[];for(let i=0;i<6;i++)this.snake.push({x:12-i,y:10});this.dir={x:1,y:0};this.next={x:1,y:0};this.obs=[{x:4,y:5},{x:18,y:9},{x:25,y:16},{x:9,y:16}];this.food();}
  food(){let f;do{f={x:2+Math.floor(Math.random()*27),y:3+Math.floor(Math.random()*16)}}while(this.snake.some(s=>s.x===f.x&&s.y===f.y)||this.obs.some(o=>o.x===f.x&&o.y===f.y));f.type=["strawberry","banana","grapes","apple","orange","watermelon"][Math.floor(Math.random()*6)];this.fruit=f}
- bind(){const set=k=>{const d={arrowup:{x:0,y:-1},w:{x:0,y:-1},arrowdown:{x:0,y:1},s:{x:0,y:1},arrowleft:{x:-1,y:0},a:{x:-1,y:0},arrowright:{x:1,y:0},d:{x:1,y:0}}[k];if(d&&!(d.x===-this.dir.x&&d.y===-this.dir.y))this.next=d};this.c.tabIndex=0;window.addEventListener("keydown",e=>{if(window.tomActiveGame!=="snake")return;const k=e.key.toLowerCase();if(k===" "){e.preventDefault();this.start();return}if(["arrowup","arrowdown","arrowleft","arrowright","w","a","s","d"].includes(k)){e.preventDefault();set(k)}});this.c.addEventListener("click",()=>{switchGame('snake');this.c.focus();this.start()});let start=null;this.c.addEventListener("pointerdown",e=>{switchGame('snake');this.c.focus();this.start();if(e.pointerType==="touch")start={x:e.clientX,y:e.clientY}});this.c.addEventListener("pointerup",e=>{if(!start)return;let dx=e.clientX-start.x,dy=e.clientY-start.y;if(Math.max(Math.abs(dx),Math.abs(dy))>15)set(Math.abs(dx)>Math.abs(dy)?(dx>0?"arrowright":"arrowleft"):(dy>0?"arrowdown":"arrowup"));start=null})}
+ bind(){const set=k=>{const d={arrowup:{x:0,y:-1},w:{x:0,y:-1},arrowdown:{x:0,y:1},s:{x:0,y:1},arrowleft:{x:-1,y:0},a:{x:-1,y:0},arrowright:{x:1,y:0},d:{x:1,y:0}}[k];if(d&&!(d.x===-this.dir.x&&d.y===-this.dir.y))this.next=d};this.c.tabIndex=0;window.addEventListener("keydown",e=>{if(window.tomActiveGame!=="snake")return;const k=e.key.toLowerCase();if(k===" "){e.preventDefault();if(!this.running&&!this.introStarted)this.start();return}if(["arrowup","arrowdown","arrowleft","arrowright","w","a","s","d"].includes(k)){e.preventDefault();set(k)}});this.c.addEventListener("click",()=>{switchGame('snake');this.c.focus();if(!this.running&&!this.introStarted)this.start()});let start=null;this.c.addEventListener("pointerdown",e=>{switchGame('snake');this.c.focus();if(!this.running&&!this.introStarted)this.start();if(e.pointerType==="touch")start={x:e.clientX,y:e.clientY}});this.c.addEventListener("pointerup",e=>{if(!start)return;let dx=e.clientX-start.x,dy=e.clientY-start.y;if(Math.max(Math.abs(dx),Math.abs(dy))>15)set(Math.abs(dx)>Math.abs(dy)?(dx>0?"arrowright":"arrowleft"):(dy>0?"arrowdown":"arrowup"));start=null})}
  deactivate(){this.running=false;this.intro=false;this.introStarted=false;this.keys={};}
  start(){if(this.lives<=0){this.lives=3;this.score=0;this.obs=[{x:4,y:5},{x:18,y:9},{x:25,y:16},{x:9,y:16}]}this.reset();this.running=false;this.demo=false;this.intro=true;this.introDone=false;this.introStarted=true;this.introY=this.c.height+70;this.introElapsed=0;this.last=performance.now();music.start()}
  speed(){return Math.max(48,185-(this.snake.length-6)*6)}
@@ -108,13 +108,13 @@ class JoaoMaria{
     const activate=()=>{switchGame('joaoMaria');this.c.focus();music.start();};
     const jump=()=>{if(!this.running)return;if(this.player.onGround){this.player.vy=-610;this.player.onGround=false;music.jump();}};
     this.keys={};
-    this.c.addEventListener('click',()=>{activate();if(!this.running)this.start();else jump();});
-    this.c.addEventListener('pointerdown',e=>{activate();if(e.pointerType==='touch'){e.preventDefault();if(!this.running)this.start();else jump();}});
+    this.c.addEventListener('click',()=>{activate();if(!this.running&&!this.introStarted)this.start();else if(this.running)jump();});
+    this.c.addEventListener('pointerdown',e=>{activate();if(e.pointerType==='touch'){e.preventDefault();if(!this.running&&!this.introStarted)this.start();else if(this.running)jump();}});
     window.addEventListener('keydown',e=>{
       if(window.tomActiveGame!=='joaoMaria')return;
       const k=e.key.toLowerCase();
       if([' ','arrowleft','arrowright','arrowdown'].includes(k))e.preventDefault();
-      if(k===' '){activate();if(!this.running)this.start();else jump();}
+      if(k===' '){activate();if(!this.running&&!this.introStarted)this.start();else if(this.running)jump();}
       if(['arrowleft','arrowright','arrowdown'].includes(k))this.keys[k]=true;
     });
     window.addEventListener('keyup',e=>{if(window.tomActiveGame==='joaoMaria')delete this.keys[e.key.toLowerCase()];});
@@ -247,7 +247,7 @@ class Racha{
   constructor(c){this.c=c;this.ctx=c.getContext('2d');this.ctx.imageSmoothingEnabled=false;this.reset();this.bind();this.loop(0);}
   reset(){this.score=0;this.passed=0;this.level=1;this.lives=4;this.timeLeft=120;this.running=false;this.intro=false;this.introStarted=false;this.introDone=false;this.introElapsed=0;this.introDuration=5;this.creditsY=this.c.height+50;this.gameOver=false;this.victory=false;this.keys={};this.inv=0;this.explosions=[];this.cars=[];this.spawnTimer=.2;this.roadOffset=0;this.last=0;this.player={x:this.c.width/2,y:this.c.height-78,w:42,h:68,tilt:0};}
   deactivate(){this.running=false;this.keys={};this.intro=false;this.introStarted=false;music.engineStop();}
-  bind(){const activate=()=>{switchGame('racha');this.c.focus();music.start();};this.c.addEventListener('pointerdown',e=>{e.preventDefault();activate();this.start();});this.c.addEventListener('click',e=>{e.preventDefault();activate();this.start();});window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();const focused=this.c===document.activeElement;if(k===' '&&focused){e.preventDefault();if(e.repeat)return;activate();if(this.running){return;}this.start();return;}if(window.tomActiveGame!=='racha')return;if(['arrowleft','arrowright','arrowup','arrowdown'].includes(k))e.preventDefault();this.keys[k]=true;});window.addEventListener('keyup',e=>{if(window.tomActiveGame==='racha')delete this.keys[e.key.toLowerCase()];});}
+  bind(){const activate=()=>{switchGame('racha');this.c.focus();music.start();};this.c.addEventListener('pointerdown',e=>{e.preventDefault();activate();if(!this.running&&!this.introStarted)this.start();});this.c.addEventListener('click',e=>{e.preventDefault();activate();if(!this.running&&!this.introStarted)this.start();});window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();const focused=this.c===document.activeElement;if(k===' '&&focused){e.preventDefault();if(e.repeat)return;activate();if(!this.running&&!this.introStarted)this.start();return;}if(window.tomActiveGame!=='racha')return;if(['arrowleft','arrowright','arrowup','arrowdown'].includes(k))e.preventDefault();this.keys[k]=true;});window.addEventListener('keyup',e=>{if(window.tomActiveGame==='racha')delete this.keys[e.key.toLowerCase()];});}
   start(){if(this.gameOver||this.victory)this.reset();this.running=false;this.intro=true;this.introStarted=true;this.introDone=false;this.introElapsed=0;this.creditsY=this.c.height+50;this.gameOver=false;this.victory=false;this.timeLeft=120;this.last=performance.now();this.cars=[];this.explosions=[];this.spawnTimer=.35;this.player.x=this.c.width/2;this.inv=0;music.start();music.engineStart();}
   levelFor(){return Math.min(7,Math.floor(this.passed/10)+1);}
   roadWidthAt(y){const top=105,bottom=this.c.width-70,p=Math.max(0,Math.min(1,(y-45)/(this.c.height-45)));return top+(bottom-top)*p;}
@@ -275,12 +275,12 @@ class AlienFort{
   }
   bind(){
     const activate=()=>{switchGame('alienFort');this.c.focus();music.start();};
-    this.c.addEventListener('click',e=>{e.preventDefault();activate();if(!this.running)this.start();});
-    this.c.addEventListener('pointerdown',e=>{e.preventDefault();activate();if(!this.running)this.start();});
+    this.c.addEventListener('click',e=>{e.preventDefault();activate();if(!this.running&&!this.introStarted&&!this.levelTransition)this.start();});
+    this.c.addEventListener('pointerdown',e=>{e.preventDefault();activate();if(!this.running&&!this.introStarted&&!this.levelTransition)this.start();});
     window.addEventListener('keydown',e=>{
       if(window.tomActiveGame!=='alienFort')return;const k=e.key.toLowerCase();
       if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();
-      if(k===' '){if(e.repeat)return;activate();if(!this.running&&!this.levelTransition)this.start();return;}
+      if(k===' '){if(e.repeat)return;activate();if(!this.running&&!this.introStarted&&!this.levelTransition)this.start();return;}
       if(['arrowup','arrowdown','arrowleft','arrowright'].includes(k)){this.keys[k]=true;if(this.running&&!this.levelTransition)this.fire(k);}
     });
     window.addEventListener('keyup',e=>{if(window.tomActiveGame==='alienFort')delete this.keys[e.key.toLowerCase()];});
@@ -392,15 +392,17 @@ class PacBang{
     this.ghosts=[]; this.enemyBullets=[];
   }
   bind(){
-    const activate=()=>{switchGame('pacbang');this.c.focus();music.start();};
+    const activate=()=>{switchGame('pacbang');this.c.focus({preventScroll:true});music.start();};
+    let lastPointerStart=0;
     window.addEventListener('keydown',e=>{
       const k=e.key.toLowerCase();
       const focused=this.c===document.activeElement;
-      if(k===' ' && focused){
+      if((k===' '||k==='enter') && focused){
         e.preventDefault();
         if(e.repeat)return;
         activate();
-        if(this.running)this.useBomb();else this.start();
+        if(this.running && k===' ')this.useBomb();
+        else if(!this.running&&!this.introStarted)this.start();
         return;
       }
       if(window.tomActiveGame!=='pacbang')return;
@@ -409,8 +411,25 @@ class PacBang{
       if(k==='a')this.fire();
     });
     window.addEventListener('keyup',e=>{if(window.tomActiveGame==='pacbang')delete this.keys[e.key.toLowerCase()];});
-    this.c.addEventListener('pointerdown',e=>{e.preventDefault();activate();this.start();if(e.pointerType==='touch')this.touchX=e.clientX;});
-    this.c.addEventListener('click',e=>{e.preventDefault();activate();this.start();});
+    this.c.addEventListener('pointerdown',e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      lastPointerStart=performance.now();
+      activate();
+      if(!this.running&&!this.introStarted)this.start();
+      if(e.pointerType==='touch'){
+        this.touchX=e.clientX;
+        try{this.c.setPointerCapture(e.pointerId);}catch(err){}
+      }
+    },{passive:false});
+    this.c.addEventListener('click',e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      // The click generated after pointerdown must never start the game a second time.
+      if(performance.now()-lastPointerStart<700)return;
+      activate();
+      if(!this.running&&!this.introStarted)this.start();
+    },{passive:false});
     this.c.addEventListener('pointermove',e=>{if(e.pointerType==='touch'&&this.touchX!=null&&this.running){const r=this.c.getBoundingClientRect();this.player.x=clamp((e.clientX-r.left)/r.width*this.c.width,34,this.c.width-34);}});
     this.c.addEventListener('pointerup',e=>{if(e.pointerType==='touch')this.touchX=null;});
     this.c.addEventListener('pointercancel',()=>this.touchX=null);
@@ -550,7 +569,7 @@ class DangerRiver{
     this.player={x:this.W/2,y:this.H-68,w:30,h:42,inv:0};this.intro=true;this.introT=0;this.running=false;this.gameOver=false;this.high=Math.max(this.high,this.score);
   }
   bind(){
-    const start=()=>{switchGame('dangerRiver');this.c.focus();music.start();if(!this.running){if(this.gameOver)this.reset();this.intro=true;this.introT=0;this.running=false;this.gameOver=false;}};
+    const start=()=>{switchGame('dangerRiver');this.c.focus();music.start();if(!this.running&&!this.intro){if(this.gameOver)this.reset();this.intro=true;this.introT=0;this.running=false;this.gameOver=false;}};
     this.c.addEventListener('pointerdown',e=>{start();if(e.pointerType==='touch'){this.touching=true;this.moveTouch(e);}});
     this.c.addEventListener('pointermove',e=>{if(e.pointerType==='touch'&&this.touching)this.moveTouch(e);});
     this.c.addEventListener('pointerup',e=>{if(e.pointerType==='touch'){this.touching=false;this.fire();}});
@@ -644,7 +663,7 @@ class DangerRiver{
 }
 
 // Inicialização: todas as classes já foram declaradas antes de serem instanciadas.
-window.tomActiveGame="invaders";
+window.tomActiveGame="";
 if($("#invaders")) window.invadersGame=new Invaders($("#invaders"));
 if($("#snake")) window.snakeGame=new Snake($("#snake"));
 if($("#joaoMaria")) window.joaoMariaGame=new JoaoMaria($("#joaoMaria"));
@@ -652,6 +671,7 @@ if($("#racha")) window.rachaGame=new Racha($("#racha"));
 if($("#pacbang")) window.pacBangGame=new PacBang($("#pacbang"));
 if($("#alienFort")) window.alienFortGame=new AlienFort($("#alienFort"));
 if($("#dangerRiver")) window.dangerRiverGame=new DangerRiver($("#dangerRiver"));
+if(window.invadersGame) window.invadersGame.active=false;
 // Somente o jogo ativo recebe atualização/renderização contínua.
 [window.snakeGame,window.joaoMariaGame,window.rachaGame,window.pacBangGame,window.alienFortGame,window.dangerRiverGame].forEach(g=>{if(g)g.active=false;});
 setupMusicButton();
