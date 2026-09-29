@@ -375,7 +375,7 @@ class PacBang{
   }
   resetAll(){
     this.score=0; this.lives=3; this.level=1; this.energy=100; this.running=false; this.demo=true; this.victory=false;
-    this.shield=0; this.bombs=2; this.bombExplosions=[]; this.bullets=[]; this.enemyBullets=[]; this.explosions=[]; this.ghosts=[]; this.boss=null; this.lastShot=0; this.lastEnemyShot=0; this.last=0; this.flash=0; this.creditsY=this.c.height+150; this.creditsSpeed=24;
+    this.shield=0; this.bombs=2; this.bombExplosions=[]; this.bullets=[]; this.enemyBullets=[]; this.explosions=[]; this.ghosts=[]; this.boss=null; this.lastShot=0; this.lastEnemyShot=0; this.last=0; this.flash=0; this.creditsY=this.c.height+150; this.creditsSpeed=160;
     this.player={x:this.c.width/2,y:this.c.height-58,speed:330,mouth:0}; this.keys={}; this.intro=false; this.introY=this.c.height+120; this.introDone=false; this.introStarted=false; this.makeWave();
   }
   makeWave(){
