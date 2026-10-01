@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" fill="#143317" rx="32"/>
+  <rect x="24" y="24" width="464" height="464" fill="none" stroke="#DCA232" stroke-width="12" rx="16"/>
+  <!-- Sunset Atari sky -->
+  <rect x="36" y="36" width="440" height="120" fill="#E88228"/>
+  <!-- Jungle silhouette -->
+  <path d="M36 156 L90 120 L150 156 L210 110 L270 156 L340 100 L410 156 L476 130 L476 220 L36 220 Z" fill="#205822"/>
+  <!-- Tree trunks -->
+  <rect x="80" y="150" width="28" height="230" fill="#6B4219"/>
+  <rect x="400" y="140" width="32" height="240" fill="#6B4219"/>
+  <!-- Water / swamp -->
+  <rect x="180" y="380" width="160" height="30" fill="#246BB3"/>
+  <!-- Ground -->
+  <rect x="36" y="380" width="144" height="96" fill="#3D8E28"/>
+  <rect x="340" y="380" width="136" height="96" fill="#3D8E28"/>
+  <rect x="36" y="420" width="440" height="56" fill="#5A3A16"/>
+  <!-- Vine -->
+  <path d="M 260 50 Q 230 220 280 320" stroke="#8C6228" stroke-width="8" fill="none"/>
+  <!-- 8-bit hero silhouette running / swinging -->
+  <g transform="translate(255, 230) scale(4)">
+    <rect x="-3" y="-12" width="6" height="6" fill="#FFCC99"/>
+    <rect x="-4" y="-14" width="8" height="3" fill="#603010"/>
+    <rect x="-4" y="-6" width="8" height="9" fill="#E6C844"/>
+    <rect x="-3" y="3" width="7" height="8" fill="#1C5C26"/>
+    <rect x="2" y="8" width="5" height="4" fill="#331A05"/>
+    <rect x="-6" y="7" width="5" height="4" fill="#331A05"/>
+  </g>
+  <!-- Game Title banner -->
+  <text x="256" y="90" font-family="'Courier New', monospace" font-weight="900" font-size="44" fill="#FFFFFF" text-anchor="middle" letter-spacing="6">AVENTURE</text>
+  <text x="256" y="125" font-family="'Courier New', monospace" font-weight="bold" font-size="16" fill="#FFE082" text-anchor="middle" letter-spacing="3">ATARI 2600 - TOMSOFTWAR</text>
+</svg>
