@@ -1,0 +1,8 @@
+{
+  "name": "DARIO Adventure — TomGames",
+  "description": "Jogo de plataforma 8-bits estilo NES com 10 fases progressivas, chefões em cada fase, poderes especiais, controles para PC e celular, efeitos sonoros retrô e ranking global para www.tomgames.com.br.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
